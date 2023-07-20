@@ -1,0 +1,88 @@
+var Header = require('postman-collection').Header;
+
+pm.request.headers.append(Header.create('true', 'Disable-Crypto'));
+
+pm.request.headers.append(Header.create('1', 'Subcanal'));
+
+
+
+
+/* Configura o SSO para recuperar o token do apostador */
+
+var ssoPostRequest = {
+
+url: 'https://logindes.caixa.gov.br/auth/realms/internet/protocol/openid-connect/token',
+
+method: 'POST', header: 'Content-Type:application/x-www-form-urlencoded',
+
+   body: {
+
+       mode: 'urlencoded',
+
+       urlencoded : [
+
+           { key: 'grant_type', value: 'password'},
+
+           { key: 'client_id', value: 'cli-web-lce'},
+
+           { key: 'username', value: '22587801010'},
+
+           { key: 'password', value: '001100'}
+
+       ]
+
+   }
+
+}
+
+
+
+
+/* Recupera o token do SSO */
+
+var getToken = true;
+
+if (!pm.environment.get('accessTokenExpiry') || !pm.environment.get('currentAccessToken')) {
+
+   console.log('Token ou data de expiração nulos');
+
+} else if (pm.environment.get('accessTokenExpiry') <= (new Date()).getTime()) {
+
+   console.log('Token expirado');
+
+} else {
+
+   getToken = false;
+
+   console.log('Token ok');
+
+}
+
+if (getToken === true) {
+
+   pm.sendRequest(ssoPostRequest, function (err, res) {
+
+       console.log(err ? err : res.json());
+
+       if (err === null) {
+
+           console.log('Salvando token e data de expiração');
+
+           var responseJson = res.json();
+
+           pm.environment.set('currentAccessToken', responseJson.access_token);
+
+
+
+
+           var expiryDate = new Date();
+
+           expiryDate.setSeconds(expiryDate.getSeconds() + responseJson.expires_in);
+
+           pm.environment.set('accessTokenExpiry', expiryDate.getTime());
+
+       }
+
+   });
+
+}
