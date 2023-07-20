@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -29,42 +30,20 @@ public class Main {
 
         // Configura a requisição POST para o SSO
         URIBuilder uriBuilder = new URIBuilder("https://logindes.caixa.gov.br/auth/realms/internet/protocol/openid-connect/token");
+
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("grant_type", "password"));
         params.add(new BasicNameValuePair("client_id", "cli-web-lce"));
         params.add(new BasicNameValuePair("username", "22587801010"));
         params.add(new BasicNameValuePair("password", "001100"));
-        uriBuilder.addParameters(params);
-        
-//		String postData = "body:{mode:'urlencoded', urlencoded:[{key:'grant_type',value:'password'},{key:'client_id',value:'cli-web-lce'},{key:'username',value:'22587801010'},{key:'password',value:'001100'}]}";
-//		String postData = "{mode:'urlencoded', urlencoded:[{key:'grant_type',value:'password'},{key:'client_id',value:'cli-web-lce'},{key:'username',value:'22587801010'},{key:'password',value:'001100'}]}";
-//		String postData = "mode:'urlencoded', urlencoded:[{key:'grant_type',value:'password'},{key:'client_id',value:'cli-web-lce'},{key:'username',value:'22587801010'},{key:'password',value:'001100'}]";
-//		String postData0 = "'body':{'mode':'urlencoded', 'urlencoded':[{'key':'grant_type','value':'password'}, {'key':'client_id', 'value':'cli-web-lce'}, {'key':'username', 'value':'22587801010'},{'key':'password', 'value':'001100'}]}";
-//		String postData0 = "{'mode':'urlencoded', 'urlencoded':[{'key':'grant_type','value':'password'}, {'key':'client_id', 'value':'cli-web-lce'}, {'key':'username', 'value':'22587801010'},{'key':'password', 'value':'001100'}]}";
-//		String postData0 = "{'grant_type':'password','client_id':'cli-web-lce','username':'22587801010','password':'001100'}";
-//		String postData = postData0.replace("'", "\"");
 
-//		HttpPost ssoPostRequest = new HttpPost(postData);
-        HttpPost ssoPostRequest = new HttpPost(uriBuilder.toString());
+        HttpPost ssoPostRequest = new HttpPost(uriBuilder.build());
         ssoPostRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        ssoPostRequest.setHeaders(headers.toArray(new Header[headers.size()]));
+        ssoPostRequest.setEntity(new UrlEncodedFormEntity(params));
 
         // Recupera o token do SSO
         boolean getToken = true;
-//        String accessTokenExpiry = ""; // Obtenha o valor de accessTokenExpiry do ambiente ou defina-o como necessário
-//        String currentAccessToken = ""; // Obtenha o valor de currentAccessToken do ambiente ou defina-o como necessário
-//
-//        if (accessTokenExpiry.isEmpty() || currentAccessToken.isEmpty()) {
-//            System.out.println("Token ou data de expiração nulos");
-//        } else {
-//            LocalDateTime expiryDateTime = LocalDateTime.parse(accessTokenExpiry);
-//            LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-//            if (expiryDateTime.isBefore(now)) {
-//                System.out.println("Token expirado");
-//            } else {
-//                getToken = false;
-//                System.out.println("Token ok");
-//            }
-//        }
 
         if (getToken) {
             CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -99,6 +78,3 @@ public class Main {
     }
     
 }
-
-
-//{"error":"invalid_request","error_description":"Missing form parameter: grant_type"}
